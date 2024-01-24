@@ -2,9 +2,9 @@
 
 namespace NoSQLSkiServiceManager.DTOs.Response
 {
-    public class OrderResponseDto
+    public class OrderResponseDto : IResponseDto
     {
-        public string OrderId { get; set; }
+        public string Id { get; set; }
         public string CustomerName { get; set; }
         public string Email { get; set; }
         public string PhoneNumber { get; set; }

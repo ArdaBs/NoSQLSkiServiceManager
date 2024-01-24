@@ -50,8 +50,14 @@ namespace NoSQLSkiServiceManager.Services
         public async Task<bool> UpdateAsync(string id, TUpdateDto updateDto)
         {
             var objectId = new ObjectId(id);
-            var model = _mapper.Map<TModel>(updateDto);
-            var result = await _collection.ReplaceOneAsync(x => x.Id == objectId, model);
+            var existingItem = await _collection.Find(x => x.Id == objectId).FirstOrDefaultAsync();
+            if (existingItem == null)
+            {
+                return false;
+            }
+
+            _mapper.Map(updateDto, existingItem);
+            var result = await _collection.ReplaceOneAsync(x => x.Id == objectId, existingItem);
             return result.IsAcknowledged && result.ModifiedCount > 0;
         }
 

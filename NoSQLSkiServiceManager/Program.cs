@@ -1,20 +1,42 @@
+using AutoMapper;
 using JetStreamAPI.PostmanCollection.Services;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using MongoDB.Driver;
+using NoSQLSkiServiceManager.DTOs.Request;
+using NoSQLSkiServiceManager.DTOs.Requests;
+using NoSQLSkiServiceManager.DTOs.Response;
 using NoSQLSkiServiceManager.Middlewares;
+using NoSQLSkiServiceManager.Models;
 using NoSQLSkiServiceManager.Services;
 using Serilog;
 using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
 
-builder.Services.AddSingleton<IMongoClient>(serviceProvider =>
+builder.Services.AddSingleton<IMongoClient>(new MongoClient(builder.Configuration.GetConnectionString("MongoDbConnection")));
+
+builder.Services.AddSingleton<IMongoDatabase>(serviceProvider =>
 {
-    var settings = MongoClientSettings.FromConnectionString(builder.Configuration.GetConnectionString("MongoDbConnection"));
-    return new MongoClient(settings);
+    var client = serviceProvider.GetRequiredService<IMongoClient>();
+    return client.GetDatabase("JetStreamAPI");
 });
+
+builder.Services.AddSingleton(serviceProvider =>
+{
+    var database = serviceProvider.GetRequiredService<IMongoDatabase>();
+    var mapper = serviceProvider.GetRequiredService<IMapper>();
+    return new GenericService<Employee, EmployeeCreateDto, EmployeeUpdateDto, EmployeeResponseDto>(database, mapper, "EmployeeCollectionName");
+});
+
+builder.Services.AddSingleton(serviceProvider =>
+{
+    var database = serviceProvider.GetRequiredService<IMongoDatabase>();
+    var mapper = serviceProvider.GetRequiredService<IMapper>();
+    return new GenericService<ServiceOrder, CreateServiceOrderRequestDto, UpdateServiceOrderRequestDto, OrderResponseDto>(database, mapper, "ServiceOrders");
+});
+
 
 var logger = new LoggerConfiguration()
     .ReadFrom.Configuration(builder.Configuration)
