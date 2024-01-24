@@ -1,4 +1,6 @@
-﻿namespace NoSQLSkiServiceManager.DTOs.Response
+﻿using NoSQLSkiServiceManager.Interfaces;
+
+namespace NoSQLSkiServiceManager.DTOs.Response
 {
     public class OrderListResponseDto
     {

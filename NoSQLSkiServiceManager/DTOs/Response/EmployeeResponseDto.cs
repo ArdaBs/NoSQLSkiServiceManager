@@ -1,6 +1,8 @@
-﻿namespace NoSQLSkiServiceManager.DTOs.Response
+﻿using NoSQLSkiServiceManager.Interfaces;
+
+namespace NoSQLSkiServiceManager.DTOs.Response
 {
-    public class EmployeeResponseDto
+    public class EmployeeResponseDto : IResponseDto
     {
         public string Id { get; set; }
         public string Username { get; set; }

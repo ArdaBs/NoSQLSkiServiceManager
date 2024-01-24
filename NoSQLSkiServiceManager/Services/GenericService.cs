@@ -6,11 +6,17 @@ using NoSQLSkiServiceManager.DTOs.Request;
 using NoSQLSkiServiceManager.DTOs.Response;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using NoSQLSkiServiceManager.Interfaces;
+using Microsoft.AspNetCore.Mvc;
 
 namespace NoSQLSkiServiceManager.Services
 {
 
-    public class GenericService<TModel, TCreateDto, TUpdateDto, TResponseDto> where TModel : class
+    public class GenericService<TModel, TCreateDto, TUpdateDto, TResponseDto>
+    where TModel : class, IEntity
+    where TCreateDto : class
+    where TUpdateDto : class
+    where TResponseDto : class, IResponseDto
     {
         private readonly IMongoCollection<TModel> _collection;
         private readonly IMapper _mapper;

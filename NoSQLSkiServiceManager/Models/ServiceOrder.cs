@@ -1,8 +1,9 @@
 ﻿using MongoDB.Bson;
+using NoSQLSkiServiceManager.Interfaces;
 
 namespace NoSQLSkiServiceManager.Models
 {
-    public class ServiceOrder
+    public class ServiceOrder : IEntity
     {
         public ObjectId Id { get; set; }
         public string CustomerName { get; set; }
