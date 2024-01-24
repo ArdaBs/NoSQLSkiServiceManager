@@ -1,4 +1,4 @@
-﻿namespace JetStreamAPI.PostmanCollection.Services
+﻿namespace NoSQLSkiServiceManager.Services
 {
     public interface ITokenService
     {

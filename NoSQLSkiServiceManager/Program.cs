@@ -1,5 +1,5 @@
 using AutoMapper;
-using JetStreamAPI.PostmanCollection.Services;
+using NoSQLSkiServiceManager.Services;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
@@ -9,7 +9,6 @@ using NoSQLSkiServiceManager.DTOs.Requests;
 using NoSQLSkiServiceManager.DTOs.Response;
 using NoSQLSkiServiceManager.Middlewares;
 using NoSQLSkiServiceManager.Models;
-using NoSQLSkiServiceManager.Services;
 using Serilog;
 using System.Text;
 
