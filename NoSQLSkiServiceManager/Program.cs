@@ -26,7 +26,7 @@ builder.Services.AddSingleton(serviceProvider =>
 {
     var database = serviceProvider.GetRequiredService<IMongoDatabase>();
     var mapper = serviceProvider.GetRequiredService<IMapper>();
-    return new GenericService<Employee, EmployeeCreateDto, EmployeeUpdateDto, EmployeeResponseDto>(database, mapper, "EmployeeCollectionName");
+    return new GenericService<Employee, EmployeeCreateDto, EmployeeUpdateDto, EmployeeResponseDto>(database, mapper, "Employees");
 });
 
 builder.Services.AddSingleton(serviceProvider =>
@@ -44,13 +44,14 @@ var logger = new LoggerConfiguration()
 builder.Logging.ClearProviders();
 builder.Logging.AddSerilog(logger);
 
-// Serilog-Konfiguration
+// Serilog-Configuration
 builder.Host.UseSerilog((ctx, lc) => lc
     .WriteTo.Console()
     .ReadFrom.Configuration(ctx.Configuration));
 
-// AutoMapper-Konfiguration
+// AutoMapper-Configuration
 builder.Services.AddAutoMapper(typeof(MappingCode));
+builder.Services.AddSingleton<TokenService>();
 
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
     .AddJwtBearer(options =>
@@ -66,13 +67,11 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
         };
     });
 
-// Inject the TokenService
-builder.Services.AddSingleton<ITokenService, TokenService>();
 builder.Services.AddSingleton<EmployeeService>();
 builder.Services.AddSingleton<ServiceOrderService>();
 
 
-// Swagger, MVC und andere Dienste
+// Swagger, MVC and other services
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen(c =>
@@ -95,7 +94,7 @@ app.UseMiddleware<ExceptionHandlingMiddleware>();
 
 
 
-// HTTP-Anfrage-Pipeline
+// HTTP-Request-Pipeline
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();

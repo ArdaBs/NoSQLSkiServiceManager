@@ -24,8 +24,9 @@ public class MappingCode : Profile
             .ForMember(dest => dest.Id, opt => opt.Ignore())
             .ForAllMembers(opts => opts.Condition((src, dest, srcMember) => srcMember != null));
 
-
         CreateMap<Employee, EmployeeResponseDto>();
 
+        CreateMap<Employee, LoginResponseDto>()
+            .ForMember(dest => dest.Password, opt => opt.MapFrom(src => src.Password));
     }
 }

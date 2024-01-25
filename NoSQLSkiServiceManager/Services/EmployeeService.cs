@@ -13,6 +13,7 @@ namespace NoSQLSkiServiceManager.Services
     {
         private readonly IMongoCollection<Employee> _employees;
         private readonly IMapper _mapper;
+        private const int MaxLoginAttempts = 3;
 
         public EmployeeService(IMongoDatabase database, IMapper mapper)
         {
@@ -54,6 +55,84 @@ namespace NoSQLSkiServiceManager.Services
             var objectId = ObjectId.Parse(id);
             var result = await _employees.DeleteOneAsync(emp => emp.Id == objectId);
             return result.IsAcknowledged && result.DeletedCount > 0;
+        }
+
+        public async Task<string> AuthenticateEmployeeAsync(EmployeeLoginDto loginDto)
+        {
+            var employee = await _employees.Find(emp => emp.Username == loginDto.Username).FirstOrDefaultAsync();
+            if (employee == null)
+            {
+                return "Benutzername nicht gefunden.";
+            }
+
+            if (employee.IsLocked)
+            {
+                return "Benutzerkonto ist gesperrt.";
+            }
+
+            if (employee.Password != loginDto.Password)
+            {
+                employee.FailedLoginAttempts += 1;
+                await UpdateFailedLoginAttempts(employee);
+
+                if (employee.FailedLoginAttempts >= 3)
+                {
+                    employee.IsLocked = true;
+                    await LockEmployeeAccount(employee);
+                    return "Benutzerkonto wurde wegen zu vieler fehlgeschlagener Versuche gesperrt.";
+                }
+
+                int remainingAttempts = 3 - employee.FailedLoginAttempts;
+                return $"Falsches Passwort. Verbleibende Versuche: {remainingAttempts}";
+            }
+
+            employee.FailedLoginAttempts = 0;
+            await ResetFailedLoginAttempts(employee);
+            return null;
+        }
+
+        private async Task UpdateFailedLoginAttempts(Employee employee)
+        {
+            var update = Builders<Employee>.Update.Set(emp => emp.FailedLoginAttempts, employee.FailedLoginAttempts);
+            await _employees.UpdateOneAsync(emp => emp.Id == employee.Id, update);
+        }
+
+        private async Task LockEmployeeAccount(Employee employee)
+        {
+            var update = Builders<Employee>.Update.Set(emp => emp.IsLocked, true);
+            await _employees.UpdateOneAsync(emp => emp.Id == employee.Id, update);
+        }
+
+        private async Task ResetFailedLoginAttempts(Employee employee)
+        {
+            var update = Builders<Employee>.Update.Set(emp => emp.FailedLoginAttempts, 0);
+            await _employees.UpdateOneAsync(emp => emp.Id == employee.Id, update);
+        }
+
+        public async Task<bool> UnlockEmployeeAccount(string username)
+        {
+            var employee = await _employees.Find(emp => emp.Username == username).FirstOrDefaultAsync();
+            if (employee == null)
+            {
+                return false;
+            }
+
+            if (!employee.IsLocked)
+            {
+                return false;
+            }
+
+            // Entsperrung des Benutzerkontos
+            var update = Builders<Employee>.Update.Set(emp => emp.IsLocked, false)
+                                                  .Set(emp => emp.FailedLoginAttempts, 0);
+            var result = await _employees.UpdateOneAsync(emp => emp.Id == employee.Id, update);
+            return result.IsAcknowledged && result.ModifiedCount > 0;
+        }
+
+
+        public async Task<Employee> GetEmployeeByUsernameAsync(string username)
+        {
+            return await _employees.Find(emp => emp.Username == username).FirstOrDefaultAsync();
         }
     }
 }

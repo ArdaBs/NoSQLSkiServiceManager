@@ -3,7 +3,7 @@ using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
 
-namespace JetStreamAPI.PostmanCollection.Services
+namespace NoSQLSkiServiceManager.Services
 {
     public class TokenService : ITokenService
     {

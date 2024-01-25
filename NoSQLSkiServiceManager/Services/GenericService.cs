@@ -19,12 +19,18 @@ namespace NoSQLSkiServiceManager.Services
     where TResponseDto : class, IResponseDto
     {
         private readonly IMongoCollection<TModel> _collection;
+        private readonly IMongoCollection<Employee> _employees;
         private readonly IMapper _mapper;
 
         public GenericService(IMongoDatabase database, IMapper mapper, string collectionName)
         {
             _collection = database.GetCollection<TModel>(collectionName);
             _mapper = mapper;
+
+            if (_collection == null)
+            {
+                throw new ArgumentNullException(nameof(_collection), "MongoDB collection cannot be null.");
+            }
         }
 
         public async Task<TResponseDto> CreateAsync(TCreateDto createDto)
@@ -67,6 +73,7 @@ namespace NoSQLSkiServiceManager.Services
             var result = await _collection.DeleteOneAsync(x => x.Id == objectId);
             return result.IsAcknowledged && result.DeletedCount > 0;
         }
+
     }
 
 }
