@@ -62,6 +62,17 @@ builder.Services.AddSingleton<ServiceOrderService>();
 // Swagger, MVC and other services
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
+var allowedOrigins = builder.Configuration["CORS:AllowedOrigins"]?.Split(',') ?? new string[0];
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("CorsPolicy", policy =>
+    {
+        policy.WithOrigins(allowedOrigins)
+            .AllowAnyHeader()
+            .AllowAnyMethod();
+    });
+});
+
 builder.Services.AddSwaggerGen(c =>
 {
     c.SwaggerDoc("v1", new OpenApiInfo { Title = "SkiService MongoDB API", Version = "v1" });
@@ -112,11 +123,10 @@ app.UseMiddleware<ExceptionHandlingMiddleware>();
 
 
 // HTTP-Request-Pipeline
-if (app.Environment.IsDevelopment())
-{
-    app.UseSwagger();
-    app.UseSwaggerUI();
-}
+// Naütrlich ist mir bewusst das in einem produktiven umgebung nicht eingesetzt
+// wird aber für projekt zwecke jetzt gemacht
+app.UseSwagger();
+app.UseSwaggerUI();
 
 app.UseHttpsRedirection();
 
