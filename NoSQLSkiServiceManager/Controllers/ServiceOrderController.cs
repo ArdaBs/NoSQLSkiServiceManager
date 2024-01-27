@@ -17,8 +17,8 @@ namespace NoSQLSkiServiceManager.Controllers
             _serviceOrderService = serviceOrderService;
         }
 
-        [HttpPost("CreateWithDetails")]
-        public async Task<ActionResult<OrderResponseDto>> CreateWithDetails(CreateServiceOrderRequestDto createDto)
+        [HttpPost]
+        public override async Task<IActionResult> Create(CreateServiceOrderRequestDto createDto)
         {
             var createdOrder = await _serviceOrderService.CreateWithDetails(createDto);
             if (createdOrder == null)

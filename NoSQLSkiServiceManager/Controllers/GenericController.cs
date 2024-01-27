@@ -38,7 +38,7 @@ namespace NoSQLSkiServiceManager.Controllers
         }
 
         [HttpPost]
-        public async Task<IActionResult> Create(TCreateDto createDto)
+        public virtual async Task<IActionResult> Create(TCreateDto createDto)
         {
             var createdItem = await _service.CreateAsync(createDto);
             return CreatedAtAction(nameof(Get), new { id = createdItem.Id }, createdItem);
