@@ -1,11 +1,10 @@
 ﻿using MongoDB.Bson.Serialization.Attributes;
 using MongoDB.Bson;
-using NoSQLSkiServiceManager.Interfaces;
 using NoSQLSkiServiceManager.Models;
 
 namespace NoSQLSkiServiceManager.DTOs.Response
 {
-    public class OrderResponseDto : IResponseDto
+    public class ServiceOrderAggregateDto
     {
         [BsonId]
         [BsonRepresentation(BsonType.ObjectId)]
@@ -17,8 +16,9 @@ namespace NoSQLSkiServiceManager.DTOs.Response
 
         public string PhoneNumber { get; set; }
 
-        public ServiceTypeDto ServiceType { get; set; }
-        public ServicePriorityDto Priority { get; set; }    
+        public ServicePriority Priority { get; set; }
+
+        public ServiceType ServiceTypeId { get; set; }
 
         public DateTime CreationDate { get; set; }
 
@@ -27,5 +27,9 @@ namespace NoSQLSkiServiceManager.DTOs.Response
         public string Comments { get; set; }
 
         public string Status { get; set; }
+
+        public IEnumerable<ServiceType> ServiceTypes { get; set; }
+        public IEnumerable<ServicePriority> ServicePriorities { get; set; }
     }
+
 }

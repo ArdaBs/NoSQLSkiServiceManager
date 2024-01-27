@@ -17,7 +17,7 @@ namespace NoSQLSkiServiceManager.Services
 
         public EmployeeService(IMongoDatabase database, IMapper mapper)
         {
-            _employees = database.GetCollection<Employee>("Employees");
+            _employees = database.GetCollection<Employee>("employees");
             _mapper = mapper;
         }
 
@@ -122,7 +122,6 @@ namespace NoSQLSkiServiceManager.Services
                 return false;
             }
 
-            // Entsperrung des Benutzerkontos
             var update = Builders<Employee>.Update.Set(emp => emp.IsLocked, false)
                                                   .Set(emp => emp.FailedLoginAttempts, 0);
             var result = await _employees.UpdateOneAsync(emp => emp.Id == employee.Id, update);

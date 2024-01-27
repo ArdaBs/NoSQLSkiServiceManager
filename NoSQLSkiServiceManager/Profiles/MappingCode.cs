@@ -14,7 +14,10 @@ public class MappingCode : Profile
             .ForMember(dest => dest.Id, opt => opt.Ignore());
         CreateMap<UpdateServiceOrderRequestDto, ServiceOrder>()
             .ForAllMembers(opts => opts.Condition((src, dest, srcMember) => srcMember != null));
-        CreateMap<ServiceOrder, OrderResponseDto>();
+        CreateMap<ServiceOrder, OrderResponseDto>()
+            .ForMember(dest => dest.ServiceType, opt => opt.MapFrom(src => src.ServiceType))
+            .ForMember(dest => dest.Priority, opt => opt.MapFrom(src => src.Priority));
+
         CreateMap<IEnumerable<ServiceOrder>, OrderListResponseDto>()
             .ForMember(dest => dest.Orders, opt => opt.MapFrom(src => src));
 
@@ -28,5 +31,8 @@ public class MappingCode : Profile
 
         CreateMap<Employee, LoginResponseDto>()
             .ForMember(dest => dest.Password, opt => opt.MapFrom(src => src.Password));
+
+        CreateMap<ServiceType, ServiceTypeDto>();
+        CreateMap<ServicePriority, ServicePriorityDto>();
     }
 }

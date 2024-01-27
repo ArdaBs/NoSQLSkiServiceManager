@@ -3,16 +3,16 @@ using MongoDB.Bson.Serialization.Attributes;
 
 namespace NoSQLSkiServiceManager.Models
 {
-    public class ServiceType
+    public class ServicePriority
     {
         [BsonId]
         [BsonRepresentation(BsonType.String)]
         public string Id { get; set; }
 
-        [BsonElement("name")]
-        public string Name { get; set; }
+        [BsonElement("priorityName")]
+        public string PriorityName { get; set; }
 
-        [BsonElement("cost")]
-        public decimal Cost { get; set; }
+        [BsonElement("dayCount")]
+        public int DayCount { get; set; }
     }
 }

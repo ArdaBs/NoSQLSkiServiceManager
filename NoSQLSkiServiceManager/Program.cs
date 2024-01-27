@@ -14,6 +14,9 @@ using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
 
+var mongoDbConnectionString = "mongodb://localhost:27017";
+var databaseName = "JetStreamAPI";
+
 builder.Services.AddSingleton<IMongoClient>(new MongoClient(builder.Configuration.GetConnectionString("MongoDbConnection")));
 
 builder.Services.AddSingleton<IMongoDatabase>(serviceProvider =>
@@ -26,16 +29,21 @@ builder.Services.AddSingleton(serviceProvider =>
 {
     var database = serviceProvider.GetRequiredService<IMongoDatabase>();
     var mapper = serviceProvider.GetRequiredService<IMapper>();
-    return new GenericService<Employee, EmployeeCreateDto, EmployeeUpdateDto, EmployeeResponseDto>(database, mapper, "Employees");
+    return new GenericService<Employee, EmployeeCreateDto, EmployeeUpdateDto, EmployeeResponseDto>(database, mapper, "employees");
 });
 
 builder.Services.AddSingleton(serviceProvider =>
 {
     var database = serviceProvider.GetRequiredService<IMongoDatabase>();
     var mapper = serviceProvider.GetRequiredService<IMapper>();
-    return new GenericService<ServiceOrder, CreateServiceOrderRequestDto, UpdateServiceOrderRequestDto, OrderResponseDto>(database, mapper, "ServiceOrders");
+    return new GenericService<ServiceOrder, CreateServiceOrderRequestDto, UpdateServiceOrderRequestDto, OrderResponseDto>(database, mapper, "serviceOrders");
 });
 
+builder.Services.AddControllers()
+    .AddJsonOptions(options =>
+    {
+        options.JsonSerializerOptions.Converters.Add(new CustomDateTimeConverter());
+    });
 
 var logger = new LoggerConfiguration()
     .ReadFrom.Configuration(builder.Configuration)
@@ -58,6 +66,11 @@ builder.Services.AddSingleton<TokenService>();
 builder.Services.AddSingleton<EmployeeService>();
 builder.Services.AddSingleton<ServiceOrderService>();
 
+
+builder.Services.AddSingleton<MongoDBService>(serviceProvider =>
+{
+    return new MongoDBService(mongoDbConnectionString, databaseName);
+});
 
 // Swagger, MVC and other services
 builder.Services.AddControllers();
@@ -123,8 +136,10 @@ app.UseMiddleware<ExceptionHandlingMiddleware>();
 
 
 // HTTP-Request-Pipeline
-// Naütrlich ist mir bewusst das in einem produktiven umgebung nicht eingesetzt
-// wird aber für projekt zwecke jetzt gemacht
+// Naütrlich ist mir bewusst das in
+// einem produktiven umgebung nicht
+// eingesetzt wird aber für projekt
+// zwecke jetzt gemacht
 app.UseSwagger();
 app.UseSwaggerUI();
 
@@ -134,5 +149,8 @@ app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapControllers();
+
+var mongoDBService = app.Services.GetRequiredService<MongoDBService>();
+await mongoDBService.EnsureDatabaseSetupAsync();
 
 app.Run();

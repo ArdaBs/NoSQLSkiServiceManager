@@ -13,12 +13,44 @@ namespace NoSQLSkiServiceManager.Services
     public class ServiceOrderService
     {
         private readonly IMongoCollection<ServiceOrder> _serviceOrders;
+        private readonly IMongoDatabase _database;
         private readonly IMapper _mapper;
 
         public ServiceOrderService(IMongoDatabase database, IMapper mapper)
         {
-            _serviceOrders = database.GetCollection<ServiceOrder>("ServiceOrders");
+            _serviceOrders = database.GetCollection<ServiceOrder>("serviceOrders");
+            _database = database;
             _mapper = mapper;
+        }
+
+        public async Task<OrderResponseDto> CreateWithDetails(CreateServiceOrderRequestDto createDto)
+        {
+            var serviceType = await _database.GetCollection<ServiceType>("serviceTypes")
+                                             .Find(st => st.Id == createDto.ServiceTypeId)
+                                             .FirstOrDefaultAsync();
+            var servicePriority = await _database.GetCollection<ServicePriority>("servicePriorities")
+                                                 .Find(sp => sp.Id == createDto.PriorityId)
+                                                 .FirstOrDefaultAsync();
+
+            var basePickupDate = createDto.CreationDate.AddDays(7 + servicePriority.DayCount);
+            var desiredPickupDate = new DateTime(basePickupDate.Year, basePickupDate.Month, basePickupDate.Day);
+
+            var serviceOrder = new ServiceOrder
+            {
+                CustomerName = createDto.CustomerName,
+                Email = createDto.Email,
+                PhoneNumber = createDto.PhoneNumber,
+                CreationDate = createDto.CreationDate,
+                PickupDate = createDto.PickupDate,
+                Comments = createDto.Comments,
+                Status = createDto.Status,
+                ServiceType = serviceType,
+                Priority = servicePriority,
+                DesiredPickupDate = desiredPickupDate
+            };
+
+            await _serviceOrders.InsertOneAsync(serviceOrder);
+            return _mapper.Map<OrderResponseDto>(serviceOrder);
         }
 
         public async Task<List<OrderResponseDto>> GetAllAsync()
@@ -49,5 +81,17 @@ namespace NoSQLSkiServiceManager.Services
             var result = await _serviceOrders.DeleteOneAsync(so => so.Id == objectId);
             return result.IsAcknowledged && result.DeletedCount > 0;
         }
+
+        public async Task<List<OrderResponseDto>> GetAllWithDetailsAsync()
+        {
+            var serviceOrders = await _serviceOrders
+                .Aggregate()
+                .Lookup("ServiceType", "ServiceTypeId", "_id", "ServiceType")
+                .Lookup("ServicePriority", "PriorityId", "_id", "ServicePriority")
+                .ToListAsync();
+
+            return _mapper.Map<List<OrderResponseDto>>(serviceOrders);
+        }
+
     }
 }
