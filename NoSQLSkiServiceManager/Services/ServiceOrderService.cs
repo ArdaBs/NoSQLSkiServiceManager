@@ -26,11 +26,22 @@ namespace NoSQLSkiServiceManager.Services
         public async Task<OrderResponseDto> CreateWithDetails(CreateServiceOrderRequestDto createDto)
         {
             var serviceType = await _database.GetCollection<ServiceType>("serviceTypes")
-                                             .Find(st => st.Id == createDto.ServiceTypeId)
-                                             .FirstOrDefaultAsync();
+                                      .Find(st => st.Id == createDto.ServiceTypeId)
+                                      .FirstOrDefaultAsync();
+
+            if (serviceType == null)
+            {
+                throw new InvalidOperationException("ServiceType not found");
+            }
+
             var servicePriority = await _database.GetCollection<ServicePriority>("servicePriorities")
                                                  .Find(sp => sp.Id == createDto.PriorityId)
                                                  .FirstOrDefaultAsync();
+
+            if (servicePriority == null)
+            {
+                throw new InvalidOperationException("ServicePriority not found");
+            }
 
             var basePickupDate = createDto.CreationDate.AddDays(7 + servicePriority.DayCount);
             var desiredPickupDate = new DateTime(basePickupDate.Year, basePickupDate.Month, basePickupDate.Day);
@@ -41,9 +52,8 @@ namespace NoSQLSkiServiceManager.Services
                 Email = createDto.Email,
                 PhoneNumber = createDto.PhoneNumber,
                 CreationDate = createDto.CreationDate,
-                PickupDate = createDto.PickupDate,
                 Comments = createDto.Comments,
-                Status = createDto.Status,
+                Status = "Offen",
                 ServiceType = serviceType,
                 Priority = servicePriority,
                 DesiredPickupDate = desiredPickupDate
@@ -52,6 +62,7 @@ namespace NoSQLSkiServiceManager.Services
             await _serviceOrders.InsertOneAsync(serviceOrder);
             return _mapper.Map<OrderResponseDto>(serviceOrder);
         }
+
 
         public async Task<List<OrderResponseDto>> GetAllAsync()
         {
