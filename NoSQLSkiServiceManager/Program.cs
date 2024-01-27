@@ -61,6 +61,14 @@ builder.Host.UseSerilog((ctx, lc) => lc
 builder.Services.AddAutoMapper(typeof(MappingCode));
 builder.Services.AddSingleton<TokenService>();
 
+string toolsDirectory = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "MongoTools");
+string backupDirectory = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "MongoDbBackup");
+
+builder.Services.AddHostedService<MongoBackupManager>(serviceProvider =>
+{
+    return new MongoBackupManager(databaseName, toolsDirectory, backupDirectory);
+});
+
 
 
 builder.Services.AddSingleton<EmployeeService>();
@@ -128,6 +136,7 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
             ValidateAudience = false
         };
     });
+
 
 var app = builder.Build();
 

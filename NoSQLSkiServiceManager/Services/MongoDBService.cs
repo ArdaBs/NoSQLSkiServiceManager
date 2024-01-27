@@ -33,10 +33,29 @@ public class MongoDBService
 
         if (!collections.Contains("employees"))
         {
+            await _database.CreateCollectionAsync("employees");
             await InitializeEmployeesAsync();
         }
 
-        await CreateUsersAsync();
+        if (!collections.Contains("serviceOrders"))
+        {
+            await _database.CreateCollectionAsync("serviceOrders");
+            await CreateExampleServiceOrderAsync();
+            await CreateServiceOrderIndexesAsync();
+        }
+
+            await CreateUsersAsync();
+    }
+
+    public async Task CreateServiceOrderIndexesAsync()
+    {
+        var serviceOrderCollection = _database.GetCollection<ServiceOrder>("serviceOrders");
+
+        var indexKeysDefinition = Builders<ServiceOrder>.IndexKeys
+            .Ascending(order => order.ServiceType.Id)
+            .Ascending(order => order.Priority.Id);
+
+        await serviceOrderCollection.Indexes.CreateOneAsync(new CreateIndexModel<ServiceOrder>(indexKeysDefinition));
     }
 
 
@@ -82,6 +101,26 @@ public class MongoDBService
 
         await servicePrioritiesCollection.InsertManyAsync(servicePriorities);
     }
+
+    public async Task CreateExampleServiceOrderAsync()
+    {
+        var serviceOrderCollection = _database.GetCollection<ServiceOrder>("serviceOrders");
+        var exampleServiceOrder = new ServiceOrder
+        {
+            CustomerName = "Max Mustermann",
+            Email = "max.mustermann@example.com",
+            PhoneNumber = "0123456789",
+            CreationDate = DateTime.Now,
+            DesiredPickupDate = DateTime.Now.AddDays(5),
+            Comments = "Bitte um sorgfältige Überprüfung der Bindungen.",
+            Status = "Offen",
+            ServiceType = new ServiceType { Id = "1", Name = "Kleiner Service", Cost = 34.95m },
+            Priority = new ServicePriority { Id = "2", PriorityName = "Standard", DayCount = 0 }
+        };
+
+        await serviceOrderCollection.InsertOneAsync(exampleServiceOrder);
+    }
+
 
     public async Task CreateUsersAsync()
     {
