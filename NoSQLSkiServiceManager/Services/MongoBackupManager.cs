@@ -93,7 +93,7 @@
             }
         }
 
-
+        
         private string GetToolPath(string toolName)
         {
             var binPath = AppDomain.CurrentDomain.BaseDirectory;
@@ -113,10 +113,14 @@
 
             var backupPath = Path.GetFullPath(Path.Combine(binPath, relativeBackupPath));
 
-            Directory.CreateDirectory(backupPath);
+            if (!Directory.Exists(backupPath))
+            {
+                Directory.CreateDirectory(backupPath);
+            }
 
             return backupPath;
         }
+
 
     }
 

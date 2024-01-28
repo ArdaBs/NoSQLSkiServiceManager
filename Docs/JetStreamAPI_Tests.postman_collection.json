@@ -1,0 +1,263 @@
+{
+	"info": {
+		"_postman_id": "208a602f-2eb0-42b0-8ff5-cecfb4181995",
+		"name": "JetStreamAPI Tests",
+		"description": "CRUD-Tests für die ServiceOrder API",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "29157576"
+	},
+	"item": [
+		{
+			"name": "Service Order",
+			"item": [
+				{
+					"name": "Create ServiceOrder",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"CustomerName\": \"Max Mustermann\",\n    \"Email\": \"max.mustermann@example.com\",\n    \"PhoneNumber\": \"0123456789\",\n    \"CreationDate\": \"2024-02-01T00:00:00\",\n    \"Comments\": \"Bitte um sorgfältige Überprüfung der Bindungen.\",\n    \"ServiceTypeId\": \"1\",\n    \"PriorityId\": \"2\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "https://localhost:7095/api/ServiceOrder",
+							"protocol": "https",
+							"host": [
+								"localhost"
+							],
+							"port": "7095",
+							"path": [
+								"api",
+								"ServiceOrder"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get All ServiceOrders",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "https://localhost:7095/api/ServiceOrder",
+							"protocol": "https",
+							"host": [
+								"localhost"
+							],
+							"port": "7095",
+							"path": [
+								"api",
+								"ServiceOrder"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get ServiceOrder by ID",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "https://localhost:7095/api/ServiceOrder/1234567890abcdef12345678",
+							"protocol": "https",
+							"host": [
+								"localhost"
+							],
+							"port": "7095",
+							"path": [
+								"api",
+								"ServiceOrder",
+								"1234567890abcdef12345678"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Update ServiceOrder",
+					"request": {
+						"method": "PUT",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"CustomerName\": \"Max Mustermann Updated\",\n    \"Email\": \"max.updated@example.com\",\n    \"PhoneNumber\": \"9876543210\",\n    \"CreationDate\": \"2024-02-01T00:00:00\",\n    \"Comments\": \"Update: Bitte um sorgfältige Überprüfung der Bindungen.\",\n    \"ServiceTypeId\": \"1\",\n    \"PriorityId\": \"2\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "https://localhost:7095/api/ServiceOrder/1234567890abcdef12345678",
+							"protocol": "https",
+							"host": [
+								"localhost"
+							],
+							"port": "7095",
+							"path": [
+								"api",
+								"ServiceOrder",
+								"1234567890abcdef12345678"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Delete ServiceOrder",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "https://localhost:7095/api/ServiceOrder/1234567890abcdef12345678",
+							"protocol": "https",
+							"host": [
+								"localhost"
+							],
+							"port": "7095",
+							"path": [
+								"api",
+								"ServiceOrder",
+								"1234567890abcdef12345678"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Employee",
+			"item": [
+				{
+					"name": "Create Employee",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"Username\": \"neuerMitarbeiter\",\n    \"Password\": \"passwort123\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "https://localhost:7095/api/Employee",
+							"protocol": "https",
+							"host": [
+								"localhost"
+							],
+							"port": "7095",
+							"path": [
+								"api",
+								"Employee"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get All Employees",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "https://localhost:7095/api/Employee",
+							"protocol": "https",
+							"host": [
+								"localhost"
+							],
+							"port": "7095",
+							"path": [
+								"api",
+								"Employee"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get Employee by ID",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "https://localhost:7095/api/Employee/1234567890abcdef12345678",
+							"protocol": "https",
+							"host": [
+								"localhost"
+							],
+							"port": "7095",
+							"path": [
+								"api",
+								"Employee",
+								"1234567890abcdef12345678"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Update Employee",
+					"request": {
+						"method": "PUT",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"Username\": \"neuerMitarbeiterUpdated\",\n    \"Password\": \"neuesPasswort123\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "https://localhost:7095/api/Employee/1234567890abcdef12345678",
+							"protocol": "https",
+							"host": [
+								"localhost"
+							],
+							"port": "7095",
+							"path": [
+								"api",
+								"Employee",
+								"1234567890abcdef12345678"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Delete Employee",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "https://localhost:7095/api/Employee/1234567890abcdef12345678",
+							"protocol": "https",
+							"host": [
+								"localhost"
+							],
+							"port": "7095",
+							"path": [
+								"api",
+								"Employee",
+								"1234567890abcdef12345678"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		}
+	]
+}
