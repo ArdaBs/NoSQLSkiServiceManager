@@ -26,6 +26,6 @@ namespace NoSQLSkiServiceManager.DTOs.Response
 
         public string Comments { get; set; }
 
-        public string Status { get; set; }
+        public  OrderStatus Status { get; set; }
     }
 }

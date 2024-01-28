@@ -113,7 +113,7 @@ public class MongoDBService
             CreationDate = DateTime.Now,
             DesiredPickupDate = DateTime.Now.AddDays(5),
             Comments = "Bitte um sorgfältige Überprüfung der Bindungen.",
-            Status = "Offen",
+            Status = OrderStatus.Offen,
             ServiceType = new ServiceType { Id = "1", Name = "Kleiner Service", Cost = 34.95m },
             Priority = new ServicePriority { Id = "2", PriorityName = "Standard", DayCount = 0 }
         };

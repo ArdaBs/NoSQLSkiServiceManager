@@ -17,7 +17,7 @@ if (!existingDbs.includes("JetStreamAPI")) {
 
   createCollectionWithValidation(jetStreamDb, "serviceOrders", {
     bsonType: "object",
-    required: ["customerName", "email", "phoneNumber", "creationDate", "desiredPickupDate", "serviceType", "priority"],
+    required: ["customerName", "email", "phoneNumber", "creationDate", "desiredPickupDate", "serviceType", "priority", "status"],
     properties: {
       customerName: { bsonType: "string", description: "must be a string and is required" },
       email: { bsonType: "string", pattern: "^.+@.+$", description: "must be a string in email format and is required" },
@@ -25,11 +25,19 @@ if (!existingDbs.includes("JetStreamAPI")) {
       creationDate: { bsonType: "date", description: "must be a date and is required" },
       desiredPickupDate: { bsonType: "date", description: "must be a date and is required" },
       comments: { bsonType: "string", description: "must be a string" },
-      status: { enum: ["Offen", "In Bearbeitung", "Abgeschlossen"], description: "must be a valid status" },
+      status: {
+        bsonType: "object",
+        required: ["statusValue", "description"],
+        properties: {
+          statusValue: { enum: ["Offen", "In Bearbeitung", "Abgeschlossen"], description: "must be a valid status" },
+          description: { bsonType: "string", description: "description of the status" }
+        }
+      },
       serviceType: { bsonType: "objectId", description: "must be an objectId and is required" },
       priority: { bsonType: "objectId", description: "must be an objectId and is required" }
     }
   });
+  
 
   createCollectionWithValidation(jetStreamDb, "serviceTypes", {
     bsonType: "object",
@@ -98,7 +106,10 @@ const serviceOrderExample = {
   pickupDate: new Date(),
   desiredPickupDate: new Date(new Date().setDate(new Date().getDate() + 5)),
   comments: "Bitte um sorgfältige Überprüfung der Bindungen.",
-  status: "Offen",
+  status: {
+    statusValue: "Offen",
+    description: "Die Bestellung ist offen und noch nicht bearbeitet."
+  },
   serviceType: { _id: "1", name: "Kleiner Service", cost: NumberDecimal("34.95") },
   priority: { _id: "2", priorityName: "Standard", dayCount: 0 }
 };

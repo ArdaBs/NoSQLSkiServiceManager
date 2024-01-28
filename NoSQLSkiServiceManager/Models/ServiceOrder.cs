@@ -33,7 +33,7 @@ namespace NoSQLSkiServiceManager.Models
         public string Comments { get; set; }
 
         [BsonElement("status")]
-        public string Status { get; set; }
+        public OrderStatus Status { get; set; }
 
         [BsonElement("serviceType")]
         public ServiceType ServiceType { get; set; }

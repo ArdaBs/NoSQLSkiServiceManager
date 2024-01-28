@@ -53,7 +53,7 @@ namespace NoSQLSkiServiceManager.Services
                 PhoneNumber = createDto.PhoneNumber,
                 CreationDate = createDto.CreationDate,
                 Comments = createDto.Comments,
-                Status = "Offen",
+                Status = OrderStatus.Offen,
                 ServiceType = serviceType,
                 Priority = servicePriority,
                 DesiredPickupDate = desiredPickupDate
