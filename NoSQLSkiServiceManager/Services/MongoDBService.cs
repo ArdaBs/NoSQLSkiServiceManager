@@ -188,6 +188,7 @@ public class MongoDBService
             Priority = new ServicePriority { Id = "2", PriorityName = "Standard", DayCount = 0 }
         };
         await serviceOrdersCollection.InsertOneAsync(serviceOrderExample);
+        await CreateServiceOrderIndexesAsync();
     }
 
 

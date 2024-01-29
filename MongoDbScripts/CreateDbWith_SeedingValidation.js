@@ -124,3 +124,12 @@ servicePrioritiesData.forEach(data => {
 
 upsertData("serviceOrders", { customerName: serviceOrderExample.customerName }, { $set: serviceOrderExample });
 
+const jetStreamDb = db.getSiblingDB("JetStreamAPI");
+
+jetStreamDb.serviceOrders.createIndex(
+    { "serviceType.Id": 1, "priority.Id": 1 },
+    { name: "serviceType_priority_index" }
+);
+
+print("Indizes in serviceOrders Kollektion erfolgreich erstellt.");
+
