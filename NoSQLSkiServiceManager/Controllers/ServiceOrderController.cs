@@ -30,5 +30,4 @@ namespace NoSQLSkiServiceManager.Controllers
 
     }
 
-
 }

@@ -19,32 +19,19 @@ public class MongoDBService
     {
         var collections = await _database.ListCollectionNames().ToListAsync();
 
-        if (!collections.Contains("serviceTypes"))
-        {
-            await _database.CreateCollectionAsync("serviceTypes");
-            await InitializeServiceTypesAsync();
-        }
+        await CreateCollectionIfNotExistsAsync("serviceTypes", ServiceTypeSchema);
+        await InsertServiceTypesAsync();
 
-        if (!collections.Contains("servicePriorities"))
-        {
-            await _database.CreateCollectionAsync("servicePriorities");
-            await InitializeServicePrioritiesAsync();
-        }
+        await CreateCollectionIfNotExistsAsync("servicePriorities", ServicePrioritySchema);
+        await InsertServicePrioritiesAsync();
 
-        if (!collections.Contains("employees"))
-        {
-            await _database.CreateCollectionAsync("employees");
-            await InitializeEmployeesAsync();
-        }
+        await CreateCollectionIfNotExistsAsync("employees", null);
+        await InitializeEmployeesAsync();
 
-        if (!collections.Contains("serviceOrders"))
-        {
-            await _database.CreateCollectionAsync("serviceOrders");
-            await CreateExampleServiceOrderAsync();
-            await CreateServiceOrderIndexesAsync();
-        }
+        await CreateCollectionIfNotExistsAsync("serviceOrders", ServiceOrderSchema);
+        await InsertServiceOrderExampleAsync();
 
-            await CreateUsersAsync();
+        await CreateUsersAsync();
     }
 
     public async Task CreateServiceOrderIndexesAsync()
@@ -56,6 +43,27 @@ public class MongoDBService
             .Ascending(order => order.Priority.Id);
 
         await serviceOrderCollection.Indexes.CreateOneAsync(new CreateIndexModel<ServiceOrder>(indexKeysDefinition));
+    }
+
+    private async Task CreateCollectionIfNotExistsAsync(string collectionName, BsonDocument schema)
+    {
+        var collectionList = _database.ListCollectionNames().ToListAsync().Result;
+        if (!collectionList.Contains(collectionName))
+        {
+            await _database.CreateCollectionAsync(collectionName);
+            if (schema != null)
+            {
+                var validator = new BsonDocument { { "$jsonSchema", schema } };
+                var validationOptions = new BsonDocument
+                {
+                    { "collMod", collectionName },
+                    { "validator", validator },
+                    { "validationLevel", "moderate" },
+                    { "validationAction", "warn" }
+                };
+                await _database.RunCommandAsync<BsonDocument>(validationOptions);
+            }
+        }
     }
 
 
@@ -73,39 +81,101 @@ public class MongoDBService
         await employeeCollection.InsertManyAsync(employees);
     }
 
-    private async Task InitializeServiceTypesAsync()
+
+    private static readonly BsonDocument ServiceTypeSchema = new BsonDocument
+    {
+        { "bsonType", "object" },
+        { "required", new BsonArray { "Id", "name", "cost" } },
+        { "properties", new BsonDocument
+            {
+                { "Id", new BsonDocument { { "bsonType", "string" }, { "description", "must be a string and is required" } } },
+                { "name", new BsonDocument { { "bsonType", "string" }, { "description", "must be a string and is required" } } },
+                { "cost", new BsonDocument { { "bsonType", "decimal" }, { "minimum", 0 }, { "description", "must be a non-negative decimal and is required" } } }
+            }
+        }
+    };
+
+    private static readonly BsonDocument ServicePrioritySchema = new BsonDocument
+    {
+        { "bsonType", "object" },
+        { "required", new BsonArray { "Id", "priorityName", "dayCount" } },
+        { "properties", new BsonDocument
+            {
+                { "Id", new BsonDocument { { "bsonType", "string" }, { "description", "must be a string and is required" } } },
+                { "priorityName", new BsonDocument { { "bsonType", "string" }, { "description", "must be a string and is required" } } },
+                { "dayCount", new BsonDocument { { "bsonType", "int" }, { "minimum", 0 }, { "description", "must be a non-negative integer and is required" } } }
+            }
+        }
+    };
+
+    private static readonly BsonDocument ServiceOrderSchema = new BsonDocument
+    {
+        { "bsonType", "object" },
+        { "required", new BsonArray { "customerName", "email", "phoneNumber", "creationDate", "desiredPickupDate", "serviceType", "priority", "status" } },
+        { "properties", new BsonDocument
+            {
+                { "customerName", new BsonDocument { { "bsonType", "string" } } },
+                { "email", new BsonDocument { { "bsonType", "string" } } },
+                { "phoneNumber", new BsonDocument { { "bsonType", "string" } } },
+                { "creationDate", new BsonDocument { { "bsonType", "date" } } },
+                { "desiredPickupDate", new BsonDocument { { "bsonType", "date" } } },
+                { "comments", new BsonDocument { { "bsonType", "string" } } },
+                { "status", new BsonDocument
+                    {
+                        { "bsonType", "object" },
+                        { "properties", new BsonDocument
+                            {
+                                { "statusValue", new BsonDocument { { "bsonType", "string" } } },
+                                { "description", new BsonDocument { { "bsonType", "string" } } }
+                            }
+                        }
+                    }
+                },
+                { "serviceType", new BsonDocument { { "bsonType", "object" } } },
+                { "priority", new BsonDocument { { "bsonType", "object" } } }
+            }
+        }
+    };
+
+
+
+
+
+    private async Task InsertServiceTypesAsync()
     {
         var serviceTypesCollection = _database.GetCollection<ServiceType>("serviceTypes");
+
         var serviceTypes = new List<ServiceType>
-        {
-            new ServiceType { Id = "1", Name = "Kleiner Service", Cost = 34.95m },
-            new ServiceType { Id = "2", Name = "Grosser Service", Cost = 59.95m },
-            new ServiceType { Id = "3", Name = "Rennski-Service", Cost = 74.95m },
-            new ServiceType { Id = "4", Name = "Bindung montieren und einstellen", Cost = 24.95m },
-            new ServiceType { Id = "5", Name = "Fell zuschneiden", Cost = 14.95m },
-            new ServiceType { Id = "6", Name = "Heisswachsen", Cost = 19.95m }
-        };
+    {
+        new ServiceType { Id = "1", Name = "Kleiner Service", Cost = (decimal)new Decimal128(34.95m) },
+        new ServiceType { Id = "2", Name = "Grosser Service", Cost = (decimal)new Decimal128(59.95m) },
+        new ServiceType { Id = "3", Name = "Rennski-Service", Cost = (decimal)new Decimal128(74.95m) },
+        new ServiceType { Id = "4", Name = "Bindung montieren und einstellen", Cost = (decimal)new Decimal128(24.95m) },
+        new ServiceType { Id = "5", Name = "Fell zuschneiden", Cost = (decimal)new Decimal128(14.95m) },
+        new ServiceType { Id = "6", Name = "Heisswachsen", Cost = (decimal)new Decimal128(19.95m) }
+    };
 
         await serviceTypesCollection.InsertManyAsync(serviceTypes);
     }
 
-    private async Task InitializeServicePrioritiesAsync()
+
+
+    private async Task InsertServicePrioritiesAsync()
     {
         var servicePrioritiesCollection = _database.GetCollection<ServicePriority>("servicePriorities");
         var servicePriorities = new List<ServicePriority>
-        {
-            new ServicePriority { Id = "1", PriorityName = "Low", DayCount = 5 },
-            new ServicePriority { Id = "2", PriorityName = "Standard", DayCount = 0 },
-            new ServicePriority { Id = "3", PriorityName = "Express", DayCount = -2 }
-        };
-
+    {
+        new ServicePriority { Id = "1", PriorityName = "Low", DayCount = 5 },
+        new ServicePriority { Id = "2", PriorityName = "Standard", DayCount = 0 },
+        new ServicePriority { Id = "3", PriorityName = "Express", DayCount = -2 }
+    };
         await servicePrioritiesCollection.InsertManyAsync(servicePriorities);
     }
 
-    public async Task CreateExampleServiceOrderAsync()
+    private async Task InsertServiceOrderExampleAsync()
     {
-        var serviceOrderCollection = _database.GetCollection<ServiceOrder>("serviceOrders");
-        var exampleServiceOrder = new ServiceOrder
+        var serviceOrdersCollection = _database.GetCollection<ServiceOrder>("serviceOrders");
+        var serviceOrderExample = new ServiceOrder
         {
             CustomerName = "Max Mustermann",
             Email = "max.mustermann@example.com",
@@ -117,8 +187,7 @@ public class MongoDBService
             ServiceType = new ServiceType { Id = "1", Name = "Kleiner Service", Cost = 34.95m },
             Priority = new ServicePriority { Id = "2", PriorityName = "Standard", DayCount = 0 }
         };
-
-        await serviceOrderCollection.InsertOneAsync(exampleServiceOrder);
+        await serviceOrdersCollection.InsertOneAsync(serviceOrderExample);
     }
 
 
