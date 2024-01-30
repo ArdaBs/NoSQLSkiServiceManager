@@ -9,6 +9,8 @@
   - [Projekt-Setup](#projekt-setup)
   - [Verwendung](#verwendung)
   - [Tests](#tests)
+  - [Automatisierung und Skripting](#automatisierung-und-skripting)
+    - [Backup-Automatisierung](#backup-automatisierung)
 
 # Projektstruktur
 
@@ -71,3 +73,27 @@ Die API kann über Endpunkte wie `https://localhost:7095/api/ServiceOrder` oder 
 ## Tests
 
 Zur Durchführung von API-Tests können Sie die bereitgestellte Postman-Collection verwenden. Diese Sammlung ist mit Collection-Variablen konfiguriert, was bedeutet, dass Sie die Tests flexibel und wiederholt ausführen können, solange das Backend aktiv ist. Importieren Sie einfach die Collection in Postman und führen Sie die Tests nach Bedarf durch.
+
+## Automatisierung und Skripting
+
+Obwohl dieses Projekt so konfiguriert ist, dass alle erforderlichen Komponenten automatisch beim Start der Anwendung erstellt werden, wurden zusätzliche Skripting-Tools bereitgestellt, um die Anforderungen des Dozenten zu erfüllen und um weitere Aspekte der Datenbankintegration zu demonstrieren.
+
+- **PowerShell-Skripte**: Für die Automatisierung von Backup-Prozessen wurden PowerShell-Skripte entwickelt. Diese Skripte sind im Verzeichnis `/MongoDbScripts` zu finden und können nach Bedarf ausgeführt werden, um manuelle Backups der Datenbank zu erstellen und wiederherzustellen.
+
+- **JavaScripts für Datenbank-Integration**: Im gleichen Verzeichnis befinden sich auch JavaScript-Dateien, die verwendet werden können, um Datenbank-Collections und Validierungsregeln direkt im MongoDB-Server zu initialisieren. Diese Skripte dienen als Ergänzung zur automatischen Initialisierung durch das Backend und können für Lehrzwecke oder zur manuellen Einrichtung der Datenbank verwendet werden.
+
+- **Automatisierter Backup im Projekt**: Zusätzlich zu den Skripten ist die Backup-Funktionalität direkt in das Projekt integriert, um eine nahtlose Datensicherung während des Betriebs zu ermöglichen. Dies stellt sicher, dass alle Daten sicher gespeichert werden, ohne dass der Benutzer manuell eingreifen muss.
+
+Diese Skripting-Optionen bieten zusätzliche Flexibilität und ermöglichen es dem Benutzer, die Datenbank-Konfigurationen zu verstehen und nach Belieben anzupassen. Sie dienen auch als praktische Beispiele für die Anwendung von Skripten zur Datenbankverwaltung.
+
+### Backup-Automatisierung
+
+Für die Automatisierung des Backup-Prozesses nutzt dieses Projekt integrierte Executables (`mongodump.exe` und `mongorestore.exe`), die im Verzeichnis `/MongoTools` enthalten sind. Diese Herangehensweise gewährleistet, dass Nutzer des Backends keine zusätzlichen Schritte zur Einrichtung von Umgebungsvariablen oder zur Konfiguration von Planungstools wie dem Windows Task Scheduler durchführen müssen.
+
+- **Integrierte Tools**: Die `mongodump.exe` und `mongorestore.exe` Tools sind direkt in das Projekt eingebunden und werden durch projekteigene Prozesse aufgerufen. Dadurch wird ein nahtloses Backup und Restore ermöglicht, das vollständig vom Backend aus gesteuert wird.
+
+- **Vermeidung von manuellen Einstellungen**: Indem wir diese Tools in das Projekt einbinden, vermeiden wir die Notwendigkeit für den Nutzer, `mongodump` oder `mongorestore` zu den Umgebungsvariablen hinzuzufügen oder sich mit externen Planern vertraut zu machen.
+
+- **Produktionsumgebung**: Während in einer Produktionsumgebung oft externe Planungstools wie der Windows Task Scheduler für regelmässige Backups verwendet werden, zielt diese Lösung darauf ab, die Einrichtung und Verwendung des Backends so einfach und direkt wie möglich zu gestalten, ohne auf externe Abhängigkeiten zurückgreifen zu müssen.
+
+Diese Strategie stellt sicher, dass jeder, der das Backend verwendet, von einer integrierten und wartungsarmen Backup-Lösung profitiert, die ohne zusätzliche Konfiguration oder Einrichtung funktioniert.
