@@ -31,6 +31,8 @@ Das NoSQL Ski Service Manager-Projekt ist sorgfältig in mehrere Verzeichnisse g
 - [`/Interfaces`](https://github.com/ArdaBs/NoSQLSkiServiceManager/tree/master/NoSQLSkiServiceManager/Interfaces): Dieses Verzeichnis beinhaltet Schnittstellen, die für die Definition von Verträgen innerhalb der Anwendung verwendet werden.
 
 - [`/Docs`](https://github.com/ArdaBs/NoSQLSkiServiceManager/tree/master/Docs): Hier befindet sich die Dokumentation, einschliesslich relevanter Dokumente wie der `Postman Collection V2.1` und anderer Testprotokolle.
+  
+- [`/MongoDbScripts`](https://github.com/ArdaBs/NoSQLSkiServiceManager/tree/master/MongoDbScripts):  Enthält Skripte für die Erstellung der Datenbank mit Validierung sowie für Backup- und Restore-Funktionalitäten.
 
 Schauen Sie im Ordner [`/Docs`](https://github.com/ArdaBs/NoSQLSkiServiceManager/tree/master/Docs) vorbei, um mehr über die Nutzung der Anwendung und die Konfiguration der Postman Collection zu erfahren.
 
@@ -78,7 +80,7 @@ Zur Durchführung von API-Tests können Sie die bereitgestellte Postman-Collecti
 
 Obwohl dieses Projekt so konfiguriert ist, dass alle erforderlichen Komponenten automatisch beim Start der Anwendung erstellt werden, wurden zusätzliche Skripting-Tools bereitgestellt, um die Anforderungen des Dozenten zu erfüllen und um weitere Aspekte der Datenbankintegration zu demonstrieren.
 
-- **PowerShell-Skripte**: Für die Automatisierung von Backup-Prozessen wurden PowerShell-Skripte entwickelt. Diese Skripte sind im Verzeichnis `/MongoDbScripts` zu finden und können nach Bedarf ausgeführt werden, um manuelle Backups der Datenbank zu erstellen und wiederherzustellen.
+- **PowerShell-Skripte**: Für die Automatisierung von Backup-Prozessen wurden PowerShell-Skripte entwickelt. Diese Skripte sind im Verzeichnis [`/MongoDbScripts`](https://github.com/ArdaBs/NoSQLSkiServiceManager/tree/master/MongoDbScripts) zu finden und können nach Bedarf ausgeführt werden, um manuelle Backups der Datenbank zu erstellen und wiederherzustellen.
 
 - **JavaScripts für Datenbank-Integration**: Im gleichen Verzeichnis befinden sich auch JavaScript-Dateien, die verwendet werden können, um Datenbank-Collections und Validierungsregeln direkt im MongoDB-Server zu initialisieren. Diese Skripte dienen als Ergänzung zur automatischen Initialisierung durch das Backend und können für Lehrzwecke oder zur manuellen Einrichtung der Datenbank verwendet werden.
 
@@ -88,7 +90,7 @@ Diese Skripting-Optionen bieten zusätzliche Flexibilität und ermöglichen es d
 
 ### Backup-Automatisierung
 
-Für die Automatisierung des Backup-Prozesses nutzt dieses Projekt integrierte Executables (`mongodump.exe` und `mongorestore.exe`), die im Verzeichnis `/MongoTools` enthalten sind. Diese Herangehensweise gewährleistet, dass Nutzer des Backends keine zusätzlichen Schritte zur Einrichtung von Umgebungsvariablen oder zur Konfiguration von Planungstools wie dem Windows Task Scheduler durchführen müssen.
+Für die Automatisierung des Backup-Prozesses nutzt dieses Projekt integrierte Executables (`mongodump.exe` und `mongorestore.exe`), die im Verzeichnis [`/MongoTools`](https://github.com/ArdaBs/NoSQLSkiServiceManager/tree/master/NoSQLSkiServiceManager/MongoTools) enthalten sind. Diese Herangehensweise gewährleistet, dass Nutzer des Backends keine zusätzlichen Schritte zur Einrichtung von Umgebungsvariablen oder zur Konfiguration von Planungstools wie dem Windows Task Scheduler durchführen müssen.
 
 - **Integrierte Tools**: Die `mongodump.exe` und `mongorestore.exe` Tools sind direkt in das Projekt eingebunden und werden durch projekteigene Prozesse aufgerufen. Dadurch wird ein nahtloses Backup und Restore ermöglicht, das vollständig vom Backend aus gesteuert wird.
 
