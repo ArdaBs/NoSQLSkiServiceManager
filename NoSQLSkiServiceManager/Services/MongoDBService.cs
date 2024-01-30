@@ -70,15 +70,19 @@ public class MongoDBService
     public async Task InitializeEmployeesAsync()
     {
         var employeeCollection = _database.GetCollection<Employee>("employees");
-        var employees = new List<Employee>
+        var exists = await employeeCollection.Find(_ => true).AnyAsync();
+        if (!exists)
         {
-            new Employee { Username = "Arda", Password = "1234", IsLocked = false, FailedLoginAttempts = 0 },
-            new Employee { Username = "Lukas", Password = "1234", IsLocked = false, FailedLoginAttempts = 0 },
-            new Employee { Username = "Goku", Password = "1234", IsLocked = false, FailedLoginAttempts = 0 },
-            new Employee { Username = "Gojo", Password = "1234", IsLocked = false, FailedLoginAttempts = 0 }
-        };
+            var employees = new List<Employee>
+            {
+                new Employee { Username = "Arda", Password = "1234", IsLocked = false, FailedLoginAttempts = 0 },
+                new Employee { Username = "Lukas", Password = "1234", IsLocked = false, FailedLoginAttempts = 0 },
+                new Employee { Username = "Goku", Password = "1234", IsLocked = false, FailedLoginAttempts = 0 },
+                new Employee { Username = "Gojo", Password = "1234", IsLocked = false, FailedLoginAttempts = 0 }
+            };
 
-        await employeeCollection.InsertManyAsync(employees);
+            await employeeCollection.InsertManyAsync(employees);
+        }
     }
 
 
@@ -144,51 +148,63 @@ public class MongoDBService
     private async Task InsertServiceTypesAsync()
     {
         var serviceTypesCollection = _database.GetCollection<ServiceType>("serviceTypes");
+        var exists = await serviceTypesCollection.Find(_ => true).AnyAsync();
+        if (!exists)
+        {
 
-        var serviceTypes = new List<ServiceType>
-    {
-        new ServiceType { Id = "1", Name = "Kleiner Service", Cost = (decimal)new Decimal128(34.95m) },
-        new ServiceType { Id = "2", Name = "Grosser Service", Cost = (decimal)new Decimal128(59.95m) },
-        new ServiceType { Id = "3", Name = "Rennski-Service", Cost = (decimal)new Decimal128(74.95m) },
-        new ServiceType { Id = "4", Name = "Bindung montieren und einstellen", Cost = (decimal)new Decimal128(24.95m) },
-        new ServiceType { Id = "5", Name = "Fell zuschneiden", Cost = (decimal)new Decimal128(14.95m) },
-        new ServiceType { Id = "6", Name = "Heisswachsen", Cost = (decimal)new Decimal128(19.95m) }
-    };
+            var serviceTypes = new List<ServiceType>
+            {
+                new ServiceType { Id = "1", Name = "Kleiner Service", Cost = (decimal)new Decimal128(34.95m) },
+                new ServiceType { Id = "2", Name = "Grosser Service", Cost = (decimal)new Decimal128(59.95m) },
+                new ServiceType { Id = "3", Name = "Rennski-Service", Cost = (decimal)new Decimal128(74.95m) },
+                new ServiceType { Id = "4", Name = "Bindung montieren und einstellen", Cost = (decimal)new Decimal128(24.95m) },
+                new ServiceType { Id = "5", Name = "Fell zuschneiden", Cost = (decimal)new Decimal128(14.95m) },
+                new ServiceType { Id = "6", Name = "Heisswachsen", Cost = (decimal)new Decimal128(19.95m) }
+            };
 
-        await serviceTypesCollection.InsertManyAsync(serviceTypes);
-    }
+            await serviceTypesCollection.InsertManyAsync(serviceTypes);
+        }
+     }
 
 
 
     private async Task InsertServicePrioritiesAsync()
     {
         var servicePrioritiesCollection = _database.GetCollection<ServicePriority>("servicePriorities");
-        var servicePriorities = new List<ServicePriority>
-    {
-        new ServicePriority { Id = "1", PriorityName = "Low", DayCount = 5 },
-        new ServicePriority { Id = "2", PriorityName = "Standard", DayCount = 0 },
-        new ServicePriority { Id = "3", PriorityName = "Express", DayCount = -2 }
-    };
-        await servicePrioritiesCollection.InsertManyAsync(servicePriorities);
+        var exists = await servicePrioritiesCollection.Find(_ => true).AnyAsync();
+        if (!exists)
+        {
+            var servicePriorities = new List<ServicePriority>
+            {
+                new ServicePriority { Id = "1", PriorityName = "Low", DayCount = 5 },
+                new ServicePriority { Id = "2", PriorityName = "Standard", DayCount = 0 },
+                new ServicePriority { Id = "3", PriorityName = "Express", DayCount = -2 }
+            };
+            await servicePrioritiesCollection.InsertManyAsync(servicePriorities);
+        }
     }
 
     private async Task InsertServiceOrderExampleAsync()
     {
         var serviceOrdersCollection = _database.GetCollection<ServiceOrder>("serviceOrders");
-        var serviceOrderExample = new ServiceOrder
+        var exists = await serviceOrdersCollection.Find(_ => true).AnyAsync();
+        if (!exists)
         {
-            CustomerName = "Max Mustermann",
-            Email = "max.mustermann@example.com",
-            PhoneNumber = "0123456789",
-            CreationDate = DateTime.Now,
-            DesiredPickupDate = DateTime.Now.AddDays(5),
-            Comments = "Bitte um sorgfältige Überprüfung der Bindungen.",
-            Status = OrderStatus.Offen,
-            ServiceType = new ServiceType { Id = "1", Name = "Kleiner Service", Cost = 34.95m },
-            Priority = new ServicePriority { Id = "2", PriorityName = "Standard", DayCount = 0 }
-        };
-        await serviceOrdersCollection.InsertOneAsync(serviceOrderExample);
-        await CreateServiceOrderIndexesAsync();
+            var serviceOrderExample = new ServiceOrder
+            {
+                CustomerName = "Max Mustermann",
+                Email = "max.mustermann@example.com",
+                PhoneNumber = "0123456789",
+                CreationDate = DateTime.Now,
+                DesiredPickupDate = DateTime.Now.AddDays(5),
+                Comments = "Bitte um sorgfältige Überprüfung der Bindungen.",
+                Status = OrderStatus.Offen,
+                ServiceType = new ServiceType { Id = "1", Name = "Kleiner Service", Cost = 34.95m },
+                Priority = new ServicePriority { Id = "2", PriorityName = "Standard", DayCount = 0 }
+            };
+            await serviceOrdersCollection.InsertOneAsync(serviceOrderExample);
+            await CreateServiceOrderIndexesAsync();
+        }
     }
 
 
