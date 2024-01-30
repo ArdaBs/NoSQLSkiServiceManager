@@ -1,4 +1,4 @@
-﻿namespace NoSQLSkiServiceManager.Services
+﻿namespace NoSQLSkiServiceManager.Interfaces
 {
     public interface ITokenService
     {
