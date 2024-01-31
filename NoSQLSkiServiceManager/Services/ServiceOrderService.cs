@@ -1,42 +1,39 @@
-﻿using AutoMapper;
-using System.Collections.Generic;
-using System.Threading.Tasks;
-using MongoDB.Driver;
+﻿using MongoDB.Driver;
+using AutoMapper;
+using NoSQLSkiServiceManager.Models;
 using NoSQLSkiServiceManager.DTOs.Requests;
 using NoSQLSkiServiceManager.DTOs.Response;
-using NoSQLSkiServiceManager.Models;
-using MongoDB.Bson;
+using System;
+using System.Threading.Tasks;
 
 namespace NoSQLSkiServiceManager.Services
 {
-
-    public class ServiceOrderService
+    public class ServiceOrderService : GenericService<ServiceOrder, CreateServiceOrderRequestDto, UpdateServiceOrderRequestDto, OrderResponseDto>
     {
-        private readonly IMongoCollection<ServiceOrder> _serviceOrders;
-        private readonly IMongoDatabase _database;
-        private readonly IMapper _mapper;
+        private readonly IMongoCollection<ServiceType> _serviceTypes;
+        private readonly IMongoCollection<ServicePriority> _servicePriorities;
 
         public ServiceOrderService(IMongoDatabase database, IMapper mapper)
+            : base(database, mapper, "serviceOrders")
         {
-            _serviceOrders = database.GetCollection<ServiceOrder>("serviceOrders");
-            _database = database;
-            _mapper = mapper;
+            _serviceTypes = database.GetCollection<ServiceType>("serviceTypes");
+            _servicePriorities = database.GetCollection<ServicePriority>("servicePriorities");
         }
 
-        public async Task<OrderResponseDto> CreateWithDetails(CreateServiceOrderRequestDto createDto)
+        public override async Task<OrderResponseDto> CreateAsync(CreateServiceOrderRequestDto createDto)
         {
-            var serviceType = await _database.GetCollection<ServiceType>("serviceTypes")
-                                      .Find(st => st.Id == createDto.ServiceTypeId)
-                                      .FirstOrDefaultAsync();
+            var serviceType = await _serviceTypes
+                                .Find(st => st.Id == createDto.ServiceTypeId)
+                                .FirstOrDefaultAsync();
 
             if (serviceType == null)
             {
                 throw new InvalidOperationException("ServiceType not found");
             }
 
-            var servicePriority = await _database.GetCollection<ServicePriority>("servicePriorities")
-                                                 .Find(sp => sp.Id == createDto.PriorityId)
-                                                 .FirstOrDefaultAsync();
+            var servicePriority = await _servicePriorities
+                                     .Find(sp => sp.Id == createDto.PriorityId)
+                                     .FirstOrDefaultAsync();
 
             if (servicePriority == null)
             {
@@ -46,62 +43,25 @@ namespace NoSQLSkiServiceManager.Services
             var basePickupDate = createDto.CreationDate.AddDays(7 + servicePriority.DayCount);
             var desiredPickupDate = new DateTime(basePickupDate.Year, basePickupDate.Month, basePickupDate.Day);
 
-            var serviceOrder = new ServiceOrder
+            decimal priceAdjustmentFactor = 1.0m;
+            if (servicePriority.PriorityName == "Express")
             {
-                CustomerName = createDto.CustomerName,
-                Email = createDto.Email,
-                PhoneNumber = createDto.PhoneNumber,
-                CreationDate = createDto.CreationDate,
-                Comments = createDto.Comments,
-                Status = OrderStatus.Offen,
-                ServiceType = serviceType,
-                Priority = servicePriority,
-                DesiredPickupDate = desiredPickupDate
-            };
+                priceAdjustmentFactor = 1.2m;
+            }
+            else if (servicePriority.PriorityName == "Low")
+            {
+                priceAdjustmentFactor = 0.8m;
+            }
+            serviceType.Cost *= priceAdjustmentFactor;
 
-            await _serviceOrders.InsertOneAsync(serviceOrder);
+            var serviceOrder = _mapper.Map<ServiceOrder>(createDto);
+            serviceOrder.ServiceType = serviceType;
+            serviceOrder.Priority = servicePriority;
+            serviceOrder.DesiredPickupDate = desiredPickupDate;
+            serviceOrder.Status = OrderStatus.Offen;
+
+            await _collection.InsertOneAsync(serviceOrder);
             return _mapper.Map<OrderResponseDto>(serviceOrder);
-        }
-
-
-        public async Task<List<OrderResponseDto>> GetAllAsync()
-        {
-            var serviceOrders = await _serviceOrders.Find(_ => true).ToListAsync();
-            return _mapper.Map<List<OrderResponseDto>>(serviceOrders);
-        }
-
-        public async Task<OrderResponseDto> GetByIdAsync(string id)
-        {
-            var objectId = new ObjectId(id);
-            var serviceOrder = await _serviceOrders.Find<ServiceOrder>(so => so.Id == objectId).FirstOrDefaultAsync();
-            return _mapper.Map<OrderResponseDto>(serviceOrder);
-        }
-
-        public async Task<bool> UpdateAsync(string id, UpdateServiceOrderRequestDto updateDto)
-        {
-            var objectId = new ObjectId(id);
-            var serviceOrder = _mapper.Map<ServiceOrder>(updateDto);
-            serviceOrder.Id = objectId;
-            var result = await _serviceOrders.ReplaceOneAsync(so => so.Id == objectId, serviceOrder);
-            return result.IsAcknowledged && result.ModifiedCount > 0;
-        }
-
-        public async Task<bool> DeleteAsync(string id)
-        {
-            var objectId = new ObjectId(id);
-            var result = await _serviceOrders.DeleteOneAsync(so => so.Id == objectId);
-            return result.IsAcknowledged && result.DeletedCount > 0;
-        }
-
-        public async Task<List<OrderResponseDto>> GetAllWithDetailsAsync()
-        {
-            var serviceOrders = await _serviceOrders
-                .Aggregate()
-                .Lookup("ServiceType", "ServiceTypeId", "_id", "ServiceType")
-                .Lookup("ServicePriority", "PriorityId", "_id", "ServicePriority")
-                .ToListAsync();
-
-            return _mapper.Map<List<OrderResponseDto>>(serviceOrders);
         }
 
     }

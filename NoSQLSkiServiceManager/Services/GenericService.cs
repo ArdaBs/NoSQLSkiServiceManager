@@ -18,9 +18,8 @@ namespace NoSQLSkiServiceManager.Services
     where TUpdateDto : class
     where TResponseDto : class, IResponseDto
     {
-        private readonly IMongoCollection<TModel> _collection;
-        private readonly IMongoCollection<Employee> _employees;
-        private readonly IMapper _mapper;
+        protected readonly IMongoCollection<TModel> _collection;
+        protected readonly IMapper _mapper;
 
         public GenericService(IMongoDatabase database, IMapper mapper, string collectionName)
         {
@@ -33,7 +32,7 @@ namespace NoSQLSkiServiceManager.Services
             }
         }
 
-        public async Task<TResponseDto> CreateAsync(TCreateDto createDto)
+        public virtual async Task<TResponseDto> CreateAsync(TCreateDto createDto)
         {
             var model = _mapper.Map<TModel>(createDto);
             await _collection.InsertOneAsync(model);

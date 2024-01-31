@@ -20,7 +20,7 @@ namespace NoSQLSkiServiceManager.Controllers
         [HttpPost]
         public override async Task<IActionResult> Create(CreateServiceOrderRequestDto createDto)
         {
-            var createdOrder = await _serviceOrderService.CreateWithDetails(createDto);
+            var createdOrder = await _serviceOrderService.CreateAsync(createDto);
             if (createdOrder == null)
             {
                 return BadRequest();
