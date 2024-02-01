@@ -5,6 +5,7 @@ using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using MongoDB.Driver;
 using NoSQLSkiServiceManager.DTOs.Request;
+using NoSQLSkiServiceManager.Profiles;
 using NoSQLSkiServiceManager.DTOs.Requests;
 using NoSQLSkiServiceManager.DTOs.Response;
 using NoSQLSkiServiceManager.Middlewares;
