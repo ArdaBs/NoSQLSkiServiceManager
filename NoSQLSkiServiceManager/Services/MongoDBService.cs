@@ -36,7 +36,7 @@ public class MongoDBService
         await CreateCollectionIfNotExistsAsync("servicePriorities", ServicePrioritySchema);
         await InsertServicePrioritiesAsync();
 
-        await CreateCollectionIfNotExistsAsync("employees", null);
+        await CreateCollectionIfNotExistsAsync("employees", EmployeeSchema);
         await InitializeEmployeesAsync();
 
         await CreateCollectionIfNotExistsAsync("serviceOrders", ServiceOrderSchema);
@@ -58,6 +58,31 @@ public class MongoDBService
 
         await serviceOrderCollection.Indexes.CreateOneAsync(new CreateIndexModel<ServiceOrder>(indexKeysDefinition));
     }
+
+    /// <summary>
+    /// Creates indexes for the employees collection, including a unique index on username.
+    /// </summary>
+    public async Task CreateEmployeeIndexesAsync()
+    {
+        var employeeCollection = _database.GetCollection<Employee>("employees");
+        var indexList = await employeeCollection.Indexes.ListAsync();
+        var indexes = await indexList.ToListAsync();
+        var usernameIndexExists = indexes.Any(index =>
+            index["key"].AsBsonDocument.Contains("username"));
+
+        if (!usernameIndexExists)
+        {
+            var usernameIndexKeysDefinition = Builders<Employee>.IndexKeys.Ascending(employee => employee.Username);
+            var usernameIndexModel = new CreateIndexModel<Employee>(usernameIndexKeysDefinition, new CreateIndexOptions { Unique = true });
+
+            await employeeCollection.Indexes.CreateOneAsync(usernameIndexModel);
+        }
+        else
+        {
+            Console.WriteLine("Index on 'username' already exists.");
+        }
+    }
+
 
     /// <summary>
     /// Creates a MongoDB collection with the specified name and schema if it does not already exist.
@@ -96,71 +121,113 @@ public class MongoDBService
         {
             var employees = new List<Employee>
             {
-                new Employee { Username = "Arda", Password = "1234", IsLocked = false, FailedLoginAttempts = 0 },
-                new Employee { Username = "Lukas", Password = "1234", IsLocked = false, FailedLoginAttempts = 0 },
-                new Employee { Username = "Goku", Password = "1234", IsLocked = false, FailedLoginAttempts = 0 },
-                new Employee { Username = "Gojo", Password = "1234", IsLocked = false, FailedLoginAttempts = 0 }
+                new Employee { Username = "Arda", Password = "12345678", IsLocked = false, FailedLoginAttempts = 0 },
+                new Employee { Username = "Lukas", Password = "12345678", IsLocked = false, FailedLoginAttempts = 0 },
+                new Employee { Username = "Goku", Password = "12345678", IsLocked = false, FailedLoginAttempts = 0 },
+                new Employee { Username = "Gojo", Password = "12345678", IsLocked = false, FailedLoginAttempts = 0 }
             };
-
             await employeeCollection.InsertManyAsync(employees);
+            await CreateEmployeeIndexesAsync();
         }
     }
 
 
     private static readonly BsonDocument ServiceTypeSchema = new BsonDocument
-    {
-        { "bsonType", "object" },
-        { "required", new BsonArray { "Id", "name", "cost" } },
-        { "properties", new BsonDocument
-            {
-                { "Id", new BsonDocument { { "bsonType", "string" }, { "description", "must be a string and is required" } } },
-                { "name", new BsonDocument { { "bsonType", "string" }, { "description", "must be a string and is required" } } },
-                { "cost", new BsonDocument { { "bsonType", "decimal" }, { "minimum", 0 }, { "description", "must be a non-negative decimal and is required" } } }
+{
+    { "bsonType", "object" },
+    { "required", new BsonArray { "Id", "name", "cost" } },
+    { "properties", new BsonDocument
+        {
+            { "Id", new BsonDocument { { "bsonType", "string" }, { "description", "must be a string and is required" } } },
+            { "name", new BsonDocument
+                {
+                    { "bsonType", "string" },
+                    { "minLength", 1 },
+                    { "maxLength", 100 },
+                    { "description", "must be a string and is required" }
+                }
+            },
+            { "cost", new BsonDocument
+                {
+                    { "bsonType", "decimal" },
+                    { "minimum", 0 },
+                    { "description", "must be a non-negative decimal and is required" }
+                }
             }
         }
-    };
+    }
+};
+
 
     private static readonly BsonDocument ServicePrioritySchema = new BsonDocument
+{
+    { "bsonType", "object" },
+    { "required", new BsonArray { "Id", "priorityName", "dayCount" } },
+    { "properties", new BsonDocument
+        {
+            { "Id", new BsonDocument { { "bsonType", "string" }, { "description", "must be a string and is required" } } },
+            { "priorityName", new BsonDocument
+                {
+                    { "bsonType", "string" },
+                    { "minLength", 1 },
+                    { "maxLength", 100 },
+                    { "description", "must be a string and is required" }
+                }
+            },
+            { "dayCount", new BsonDocument
+                {
+                    { "bsonType", "int" },
+                    { "minimum", 0 },
+                    { "description", "must be a non-negative integer and is required" }
+                }
+            }
+        }
+    }
+};
+
+
+    private static readonly BsonDocument ServiceOrderSchema = new BsonDocument
+{
+    { "bsonType", "object" },
+    { "required", new BsonArray { "customerName", "email", "phoneNumber", "creationDate", "desiredPickupDate", "serviceType", "priority", "status" } },
+    { "properties", new BsonDocument
+        {
+            { "customerName", new BsonDocument
+                {
+                    { "bsonType", "string" },
+                    { "minLength", 1 },
+                    { "maxLength", 255 },
+                }
+            },
+            { "email", new BsonDocument
+                {
+                    { "bsonType", "string" },
+                    { "pattern", "[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}" },
+                }
+            },
+            { "phoneNumber", new BsonDocument
+                {
+                    { "bsonType", "string" },
+                }
+            },
+        }
+    }
+};
+
+        private static readonly BsonDocument EmployeeSchema = new BsonDocument
     {
         { "bsonType", "object" },
-        { "required", new BsonArray { "Id", "priorityName", "dayCount" } },
+        { "required", new BsonArray { "username", "password", "isLocked", "failedLoginAttempts" } },
         { "properties", new BsonDocument
             {
-                { "Id", new BsonDocument { { "bsonType", "string" }, { "description", "must be a string and is required" } } },
-                { "priorityName", new BsonDocument { { "bsonType", "string" }, { "description", "must be a string and is required" } } },
-                { "dayCount", new BsonDocument { { "bsonType", "int" }, { "minimum", 0 }, { "description", "must be a non-negative integer and is required" } } }
+                { "username", new BsonDocument { { "bsonType", "string" }, { "minLength", 3 }, { "description", "must be a non-empty string and is required" } } },
+                { "password", new BsonDocument { { "bsonType", "string" }, { "minLength", 8 }, { "description", "must be a non-empty string and is required" } } },
+                { "isLocked", new BsonDocument { { "bsonType", "bool" }, { "description", "must be a boolean and is required" } } },
+                { "failedLoginAttempts", new BsonDocument { { "bsonType", "int" }, { "minimum", 0 }, { "description", "must be a non-negative integer and is required" } } }
             }
         }
     };
 
-    private static readonly BsonDocument ServiceOrderSchema = new BsonDocument
-    {
-        { "bsonType", "object" },
-        { "required", new BsonArray { "customerName", "email", "phoneNumber", "creationDate", "desiredPickupDate", "serviceType", "priority", "status" } },
-        { "properties", new BsonDocument
-            {
-                { "customerName", new BsonDocument { { "bsonType", "string" } } },
-                { "email", new BsonDocument { { "bsonType", "string" } } },
-                { "phoneNumber", new BsonDocument { { "bsonType", "string" } } },
-                { "creationDate", new BsonDocument { { "bsonType", "date" } } },
-                { "desiredPickupDate", new BsonDocument { { "bsonType", "date" } } },
-                { "comments", new BsonDocument { { "bsonType", "string" } } },
-                { "status", new BsonDocument
-                    {
-                        { "bsonType", "object" },
-                        { "properties", new BsonDocument
-                            {
-                                { "statusValue", new BsonDocument { { "bsonType", "string" } } },
-                                { "description", new BsonDocument { { "bsonType", "string" } } }
-                            }
-                        }
-                    }
-                },
-                { "serviceType", new BsonDocument { { "bsonType", "object" } } },
-                { "priority", new BsonDocument { { "bsonType", "object" } } }
-            }
-        }
-    };
 
     /// <summary>
     /// Inserts predefined service types into the database if they do not already exist.

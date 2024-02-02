@@ -55,9 +55,6 @@ namespace NoSQLSkiServiceManager.Services
                 throw new InvalidOperationException("ServicePriority not found");
             }
 
-            var basePickupDate = createDto.CreationDate.AddDays(7 + servicePriority.DayCount);
-            var desiredPickupDate = new DateTime(basePickupDate.Year, basePickupDate.Month, basePickupDate.Day);
-
             decimal priceAdjustmentFactor = 1.0m;
             if (servicePriority.PriorityName == "Express")
             {
@@ -72,6 +69,9 @@ namespace NoSQLSkiServiceManager.Services
             var serviceOrder = _mapper.Map<ServiceOrder>(createDto);
             serviceOrder.ServiceType = serviceType;
             serviceOrder.Priority = servicePriority;
+            serviceOrder.CreationDate = DateTime.UtcNow;
+            var basePickupDate = serviceOrder.CreationDate.AddDays(7 + servicePriority.DayCount);
+            var desiredPickupDate = new DateTime(basePickupDate.Year, basePickupDate.Month, basePickupDate.Day);
             serviceOrder.DesiredPickupDate = desiredPickupDate;
             serviceOrder.Status = OrderStatus.Offen;
 

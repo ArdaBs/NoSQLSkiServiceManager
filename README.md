@@ -10,6 +10,7 @@
   - [Verwendung](#verwendung)
   - [Tests](#tests)
   - [Automatisierung und Skripting](#automatisierung-und-skripting)
+  - [Zusätzliche anforderung statistische Auswertungsabfragen](#zusätzliche-anforderung-statistische-auswertungsabfragen)
     - [Backup-Automatisierung](#backup-automatisierung)
 
 # Projektstruktur
@@ -87,6 +88,9 @@ Obwohl dieses Projekt so konfiguriert ist, dass alle erforderlichen Komponenten 
 - **Automatisierter Backup im Projekt**: Zusätzlich zu den Skripten ist die Backup-Funktionalität direkt in das Projekt integriert, um eine nahtlose Datensicherung während des Betriebs zu ermöglichen. Dies stellt sicher, dass alle Daten sicher gespeichert werden, ohne dass der Benutzer manuell eingreifen muss.
 
 Diese Skripting-Optionen bieten zusätzliche Flexibilität und ermöglichen es dem Benutzer, die Datenbank-Konfigurationen zu verstehen und nach Belieben anzupassen. Sie dienen auch als praktische Beispiele für die Anwendung von Skripten zur Datenbankverwaltung.
+
+## Zusätzliche anforderung statistische Auswertungsabfragen
+Die Abfragen können hier gefunden werden: [`/Statistische_Auswertungsabfragen`](https://github.com/ArdaBs/NoSQLSkiServiceManager/tree/master/MongoDbScripts/Statistische_Auswertungsabfragen)
 
 ### Backup-Automatisierung
 
