@@ -11,7 +11,13 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace NoSQLSkiServiceManager.Services
 {
-
+    /// <summary>
+    /// Provides a generic service layer for CRUD operations on MongoDB collections.
+    /// </summary>
+    /// <typeparam name="TModel">The entity model type.</typeparam>
+    /// <typeparam name="TCreateDto">The DTO used for create operations.</typeparam>
+    /// <typeparam name="TUpdateDto">The DTO used for update operations.</typeparam>
+    /// <typeparam name="TResponseDto">The DTO returned by the service methods.</typeparam>
     public class GenericService<TModel, TCreateDto, TUpdateDto, TResponseDto>
     where TModel : class, IEntity
     where TCreateDto : class
@@ -21,6 +27,12 @@ namespace NoSQLSkiServiceManager.Services
         protected readonly IMongoCollection<TModel> _collection;
         protected readonly IMapper _mapper;
 
+        /// <summary>
+        /// Initializes a new instance of the GenericService class.
+        /// </summary>
+        /// <param name="database">The Mongo database connection.</param>
+        /// <param name="mapper">The class used for object mapping.</param>
+        /// <param name="collectionName">The name of the MongoDB collection.</param>
         public GenericService(IMongoDatabase database, IMapper mapper, string collectionName)
         {
             _collection = database.GetCollection<TModel>(collectionName);
@@ -32,6 +44,11 @@ namespace NoSQLSkiServiceManager.Services
             }
         }
 
+        /// <summary>
+        /// Creates a new entity in the collection.
+        /// </summary>
+        /// <param name="createDto">The DTO from which to create the entity.</param>
+        /// <returns>The created entity mapped to a response DTO.</returns>
         public virtual async Task<TResponseDto> CreateAsync(TCreateDto createDto)
         {
             var model = _mapper.Map<TModel>(createDto);
@@ -39,12 +56,21 @@ namespace NoSQLSkiServiceManager.Services
             return _mapper.Map<TResponseDto>(model);
         }
 
+        /// <summary>
+        /// Asynchronously retrieves all entities in the collection.
+        /// </summary>
+        /// <returns>A list of response DTOs representing all the entities in the collection.</returns>
         public async Task<IEnumerable<TResponseDto>> GetAllAsync()
         {
             var items = await _collection.Find(_ => true).ToListAsync();
             return _mapper.Map<IEnumerable<TResponseDto>>(items);
         }
 
+        /// <summary>
+        /// Asynchronously retrieves an entity by its identifier.
+        /// </summary>
+        /// <param name="id">The identifier of the entity to retrieve.</param>
+        /// <returns>The response DTO representing the entity, if found.</returns>
         public async Task<TResponseDto> GetByIdAsync(string id)
         {
             var objectId = new ObjectId(id);
@@ -52,6 +78,12 @@ namespace NoSQLSkiServiceManager.Services
             return _mapper.Map<TResponseDto>(item);
         }
 
+        /// <summary>
+        /// Asynchronously updates an entity in the collection.
+        /// </summary>
+        /// <param name="id">The identifier of the entity to update.</param>
+        /// <param name="updateDto">The DTO containing update data.</param>
+        /// <returns>True if the update is successful, false otherwise.</returns>
         public async Task<bool> UpdateAsync(string id, TUpdateDto updateDto)
         {
             var objectId = new ObjectId(id);
@@ -66,6 +98,11 @@ namespace NoSQLSkiServiceManager.Services
             return result.IsAcknowledged && result.ModifiedCount > 0;
         }
 
+        /// <summary>
+        /// Asynchronously deletes an entity from the collection.
+        /// </summary>
+        /// <param name="id">The identifier of the entity to delete.</param>
+        /// <returns>True if the deletion is successful, false otherwise.</returns>
         public async Task<bool> DeleteAsync(string id)
         {
             var objectId = new ObjectId(id);

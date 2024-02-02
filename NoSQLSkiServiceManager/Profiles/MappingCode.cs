@@ -7,6 +7,13 @@ using System.Collections.Generic;
 
 namespace NoSQLSkiServiceManager.Profiles
 {
+    /// <summary>
+    /// Defines mapping configurations for DTOs and domain models.
+    /// </summary>
+    /// <remarks>
+    /// This profile sets up AutoMapper mappings between various Data Transfer Objects (DTOs) and the domain models.
+    /// It simplifies object-to-object mappings, ensuring that entities are correctly transformed between layers.
+    /// </remarks>
     public class MappingCode : Profile
     {
         public MappingCode()
@@ -34,6 +41,7 @@ namespace NoSQLSkiServiceManager.Profiles
             CreateMap<Employee, LoginResponseDto>()
                 .ForMember(dest => dest.Password, opt => opt.MapFrom(src => src.Password));
 
+            // ServiceType and ServicePriority mappings
             CreateMap<ServiceType, ServiceTypeDto>();
             CreateMap<ServicePriority, ServicePriorityDto>();
         }

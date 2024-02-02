@@ -6,14 +6,27 @@ using System.Text;
 
 namespace NoSQLSkiServiceManager.Services
 {
+    /// <summary>
+    /// Service responsible for generating JWT tokens for authentication purposes.
+    /// </summary>
     public class TokenService : ITokenService
     {
         private readonly SymmetricSecurityKey _key;
+
+        /// <summary>
+        /// Initializes a new instance of the TokenService with the symmetric security key.
+        /// </summary>
+        /// <param name="config">Configuration containing JWT settings.</param>
         public TokenService(IConfiguration config)
         {
             _key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(config["Jwt:Key"]));
         }
 
+        /// <summary>
+        /// Creates a JWT token for a given username.
+        /// </summary>
+        /// <param name="username">The username for which the token is being created.</param>
+        /// <returns>A JWT token as a string.</returns>
         public string CreateToken(string username)
         {
             var claims = new List<Claim>

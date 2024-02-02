@@ -8,6 +8,16 @@ using NoSQLSkiServiceManager.Services;
 
 namespace NoSQLSkiServiceManager.Controllers
 {
+    /// <summary>
+    /// Provides a generic API controller for CRUD operations on models.
+    /// </summary>
+    /// <typeparam name="TModel">The type of the model.</typeparam>
+    /// <typeparam name="TCreateDto">The type of the create DTO.</typeparam>
+    /// <typeparam name="TUpdateDto">The type of the update DTO.</typeparam>
+    /// <typeparam name="TResponseDto">The type of the response DTO.</typeparam>
+    /// <remarks>
+    /// This controller abstracts common CRUD operations to reduce redundancy across specific controllers.
+    /// </remarks>
     [ApiController]
     [Route("api/[controller]")]
     public class GenericController<TModel, TCreateDto, TUpdateDto, TResponseDto> : ControllerBase
@@ -18,11 +28,19 @@ namespace NoSQLSkiServiceManager.Controllers
     {
         private readonly GenericService<TModel, TCreateDto, TUpdateDto, TResponseDto> _service;
 
+        /// <summary>
+        /// Initializes a new instance of the <see cref="GenericController{TModel, TCreateDto, TUpdateDto, TResponseDto}"/> class.
+        /// </summary>
+        /// <param name="service">The service to be used for CRUD operations.</param>
         public GenericController(GenericService<TModel, TCreateDto, TUpdateDto, TResponseDto> service)
         {
             _service = service;
         }
 
+        /// <summary>
+        /// Retrieves all instances of the model.
+        /// </summary>
+        /// <returns>A list of all instances.</returns>
         [HttpGet]
         public async Task<IActionResult> GetAll()
         {
@@ -30,6 +48,11 @@ namespace NoSQLSkiServiceManager.Controllers
             return Ok(items);
         }
 
+        /// <summary>
+        /// Retrieves a single instance of the model by ID.
+        /// </summary>
+        /// <param name="id">The ID of the instance to retrieve.</param>
+        /// <returns>The requested instance if found; otherwise, NotFound.</returns>
         [HttpGet("{id}")]
         public async Task<IActionResult> Get(string id)
         {
@@ -37,6 +60,11 @@ namespace NoSQLSkiServiceManager.Controllers
             return item != null ? Ok(item) : NotFound();
         }
 
+        /// <summary>
+        /// Creates a new instance of the model.
+        /// </summary>
+        /// <param name="createDto">The data transfer object containing the creation data.</param>
+        /// <returns>A response indicating the result of the creation operation.</returns>
         [HttpPost]
         public virtual async Task<IActionResult> Create(TCreateDto createDto)
         {
@@ -44,6 +72,12 @@ namespace NoSQLSkiServiceManager.Controllers
             return CreatedAtAction(nameof(Get), new { id = createdItem.Id }, createdItem);
         }
 
+        /// <summary>
+        /// Updates an existing instance of the model.
+        /// </summary>
+        /// <param name="id">The ID of the instance to update.</param>
+        /// <param name="updateDto">The data transfer object containing the update data.</param>
+        /// <returns>A response indicating the result of the update operation.</returns>
         [HttpPut("{id}")]
         public async Task<IActionResult> Update(string id, TUpdateDto updateDto)
         {
@@ -51,6 +85,11 @@ namespace NoSQLSkiServiceManager.Controllers
             return updated ? NoContent() : NotFound();
         }
 
+        /// <summary>
+        /// Deletes an existing instance of the model.
+        /// </summary>
+        /// <param name="id">The ID of the instance to delete.</param>
+        /// <returns>A response indicating the result of the deletion operation.</returns>
         [HttpDelete("{id}")]
         public async Task<IActionResult> Delete(string id)
         {
